@@ -1,12 +1,12 @@
 AtomBot
 =======
-###A bot for Discord written with love in Go  
+### A bot for Discord written with love in Go  
   
-####Dependencies  
+#### Dependencies  
 >discordgo by bwmarrin  
 >>`go get github.com/bwmarrin/discordgo`  
   
-####Usage  
+#### Usage  
 `go run AtomBot.go -t <bot token> -d <"database" file for 'seen'>`  
   
 **or**  
