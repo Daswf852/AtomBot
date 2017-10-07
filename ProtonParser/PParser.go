@@ -65,8 +65,9 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 	//cmd, exists := p.commands[name]
 	//str := m.Content
 	arguments := makeArguments(m)
+	valid := strings.HasPrefix(arguments.Args[0], p.prefix)
 	function, exists := p.commands[strings.TrimLeft(arguments.Args[0], p.prefix)]
-	if exists {
+	if valid && exists {
 		//cmd.Name = fmt.Sprintf("%s%s", p.prefix, cmd.Name)
 		//cmd.Command(args, s, m)
 		if function.ArgumentCount <= arguments.Count {
@@ -74,7 +75,7 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 		} else {
 			return fmt.Sprintln("Minimum argument requirement not met, it needs to be atleast ", function.ArgumentCount, "but is ", arguments.Count)
 		}
-	} else if strings.TrimLeft(arguments.Args[0], p.prefix) == "help" {
+	} else if (strings.TrimLeft(arguments.Args[0], p.prefix) == "help") && valid {
 		if len(arguments.Args) > 1 {
 			return p.help(arguments.Args[1])
 		} else {
