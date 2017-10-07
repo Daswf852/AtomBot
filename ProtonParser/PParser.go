@@ -85,7 +85,7 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 		if p.noUnknownMsg {
 			//fmt.Println("couldnt find", strings.TrimLeft(str, p.prefix))
 			return ""
-		} else {
+		} else if valid {
 			return p.help("")
 		}
 	}
