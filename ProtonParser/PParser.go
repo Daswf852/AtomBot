@@ -33,9 +33,9 @@ type Arguments struct {
 	Count int
 }
 type Parser struct {
-	commands     map[string]Command //access by command name
-	prefix       string
-	noUnknownMsg bool
+	commands   map[string]Command //access by command name
+	prefix     string
+	unknownMsg bool
 }
 
 func MakeParser() Parser { //done
@@ -82,10 +82,7 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 			return p.help("")
 		}
 	} else {
-		if p.noUnknownMsg {
-			//fmt.Println("couldnt find", strings.TrimLeft(str, p.prefix))
-			return ""
-		} else if valid {
+		if p.unknownMsg && valid {
 			return p.help("")
 		}
 	}
