@@ -86,7 +86,7 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 			return p.help("")
 		}
 	}
-	return "impossible error, boolean value isnt 1 or 0" //this is never gonna happen
+	return ""
 }
 
 func (p *Parser) help(cmd string) string {
