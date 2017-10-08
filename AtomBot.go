@@ -15,8 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 package main
 
 import (
-	NL "AtomBot/NeutronLogger"
-	PP "AtomBot/ProtonParser"
+	Core "AtomBot/Core"
 	"flag"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
@@ -29,18 +28,18 @@ import (
 var (
 	Token  string
 	DBFile string
-	Parser PP.Parser
-	Logger NL.Logger
+	Parser Core.Parser
+	Logger Core.Logger
 )
 
 func init() {
 	flag.StringVar(&Token, "t", "", "Bot Token")
 	flag.StringVar(&DBFile, "d", "", "'Database' file")
 	flag.Parse()
-	Parser = PP.MakeParser()
+	Parser = Core.MakeParser()
 
 	//register commands
-	echoCmd := PP.Command{
+	echoCmd := Core.Command{
 		"echo",
 		1,
 		"A command to *echo* what you say", "echo [message]",
@@ -48,7 +47,7 @@ func init() {
 		echo}
 	Parser.Register(&echoCmd)
 
-	pingCmd := PP.Command{
+	pingCmd := Core.Command{
 		"Ping!",
 		0,
 		"Ping the bot! Or maybe a website in future...", "Ping!",
@@ -56,7 +55,7 @@ func init() {
 		ping}
 	Parser.Register(&pingCmd)
 
-	succCmd := PP.Command{
+	succCmd := Core.Command{
 		"succ",
 		0,
 		"succ someone", "succ (opt.)[user mention]",
@@ -64,7 +63,7 @@ func init() {
 		succ}
 	Parser.Register(&succCmd)
 
-	fuccCmd := PP.Command{
+	fuccCmd := Core.Command{
 		"fucc",
 		0,
 		"fucc someone", "fucc (opt.)[user mention]",
@@ -72,7 +71,7 @@ func init() {
 		fucc}
 	Parser.Register(&fuccCmd)
 
-	whoamiCmd := PP.Command{
+	whoamiCmd := Core.Command{
 		"whoami",
 		0,
 		"A command to get your user info", "whoami",
@@ -80,7 +79,7 @@ func init() {
 		whoami}
 	Parser.Register(&whoamiCmd)
 
-	seenCmd := PP.Command{
+	seenCmd := Core.Command{
 		"seen",
 		1,
 		"A command to see the last seen info of a user mentioned", "seen [user mention]",
@@ -90,7 +89,7 @@ func init() {
 	//register commands end
 
 	Parser.SetPrefix(",")
-	Logger = NL.MakeLogger()
+	Logger = Core.MakeLogger()
 	Logger.ReadFromFile("db.json")
 }
 
@@ -111,7 +110,7 @@ func main() {
 	}
 
 	fmt.Println("Bot is up and running!")
-
+	bot.UpdateStatus(0, "github.com/Daswf852/AtomBot")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -139,7 +138,7 @@ func onStatusUpdate(s *discordgo.Session, p *discordgo.PresenceUpdate) {
 
 //commands
 
-func echo(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
+func echo(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
 	var retString string
 	for i := 1; len(args.Args) > i; i++ {
 		retString = fmt.Sprintln(retString, args.Args[i])
@@ -148,11 +147,11 @@ func echo(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) s
 	return retString
 }
 
-func ping(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
+func ping(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
 	return "Pong!"
 }
 
-func succ(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
+func succ(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
 	s.ChannelMessageDelete(m.ChannelID, m.Message.ID)
 	if args.Count >= 1 {
 		return fmt.Sprintf("***%s succs %s***", m.Author.Mention(), args.Args[1])
@@ -161,7 +160,7 @@ func succ(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) s
 	}
 }
 
-func fucc(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
+func fucc(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
 	s.ChannelMessageDelete(m.ChannelID, m.Message.ID)
 	if args.Count >= 1 {
 		return fmt.Sprintf("***%s fuccs %s***", m.Author.Mention(), args.Args[1])
@@ -170,7 +169,7 @@ func fucc(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) s
 	}
 }
 
-func whoami(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
+func whoami(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
 	author := discordgo.MessageEmbedAuthor{
 		Name:    fmt.Sprintln("User info of: ", m.Author.String()),
 		IconURL: m.Author.AvatarURL("")}
@@ -187,7 +186,7 @@ func whoami(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate)
 	return fmt.Sprintln("Here you go ", m.Author.Mention(), "!")
 }
 
-func seen(args PP.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
+func seen(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
 	if len(m.Mentions) > 0 {
 		if Logger.EntryExists(m.Mentions[0].ID) {
 			user, _ := Logger.GetInfo(m.Mentions[0].ID)
