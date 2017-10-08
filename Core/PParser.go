@@ -15,7 +15,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /*
 for porting to different protocols, edit:
 	'Command' in struct 'Command'
-
+	'return function.Command(...) from 'Execute()'
 */
 package Core
 
