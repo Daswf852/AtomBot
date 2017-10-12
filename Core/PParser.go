@@ -12,11 +12,6 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/*
-for porting to different protocols, edit:
-	'Command' in struct 'Command'
-	'return function.Command(...) from 'Execute()'
-*/
 package Core
 
 import (
@@ -31,6 +26,7 @@ type Command struct {
 	HelpMsg           string
 	UsageMsg          string
 	IsDisplayedOnHelp bool
+	PermLevel         int
 	Command           func(Arguments, *discordgo.Session, *discordgo.MessageCreate) string
 }
 type Arguments struct {
@@ -38,15 +34,23 @@ type Arguments struct {
 	Count int
 }
 type Parser struct {
-	commands   map[string]Command
-	prefix     string
-	unknownMsg bool
+	commands     map[string]Command
+	prefix       string
+	unknownMsg   bool
+	logger       *Logger
+	loggerLinked bool
 }
 
 func MakeParser() Parser {
 	return Parser{
-		make(map[string]Command), "", true}
+		make(map[string]Command), "", true, nil, false}
 }
+
+func (p *Parser) LinkLogger(l *Logger) {
+	p.logger = l
+	p.loggerLinked = true
+}
+
 func (p *Parser) SetPrefix(pr string) {
 	p.prefix = pr
 
@@ -70,9 +74,18 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 	arguments := makeArguments(m.Content)
 	valid := strings.HasPrefix(arguments.Args[0], p.prefix)
 	function, exists := p.commands[strings.TrimLeft(arguments.Args[0], p.prefix)]
+	if !p.loggerLinked && valid && exists {
+		return "contact developer, database not linked..."
+	}
+	user, _ := p.logger.GetInfo(m.Author.ID)
+
 	if valid && exists {
 		if function.ArgumentCount <= arguments.Count {
-			return function.Command(arguments, s, m)
+			if user.PermLevel >= function.PermLevel {
+				return function.Command(arguments, s, m)
+			} else {
+				return fmt.Sprintf("Your permLevel needs to be atleast %v but is %v!", function.PermLevel, user.PermLevel)
+			}
 		} else {
 			return fmt.Sprintln("Minimum argument requirement not met, it needs to be atleast ", function.ArgumentCount, "but is ", arguments.Count)
 		}
@@ -83,7 +96,8 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 			return p.help("")
 		}
 	} else {
-		if p.unknownMsg && valid {
+		if p.unknownMsg && !(p.prefix == "") {
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("current message: %s\nVariables: %v %v", m.Content, p.unknownMsg, valid))
 			return p.help("")
 		}
 	}

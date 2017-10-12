@@ -12,6 +12,16 @@ Redistribution and use in source and binary forms, with or without modification,
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+//note: this file also has permission system since i was too lazy to make another file for it
+//note 2: this file also has points for users
+/* note 3: permissions
+-1 : blocked from using the bot
+0  : normal user, can do normal user things
+1  : priviledged user, can make botwide announcements
+2  : moderator, can reboot bot and change bot prefix
+3  : admin, can shutdown bot, manage user data, manage config
+*/
+
 package Core
 
 import (
@@ -27,7 +37,8 @@ type UserInfo struct {
 	LastMessage string
 	LastChannel string
 	LastGame    string
-	dogeCoins   int
+	PermLevel   int
+	FancyPoints int
 }
 
 type Logger struct {
@@ -43,7 +54,8 @@ func (l *Logger) MakeUser(id string) {
 		l.users[id] = &UserInfo{
 			LastSeen:    time.Now(),
 			LastMessage: "Last message not recorded",
-			LastGame:    "Last played game not recorded"}
+			LastGame:    "Last played game not recorded",
+			PermLevel:   0}
 	}
 }
 
@@ -52,7 +64,19 @@ func (l *Logger) GetInfo(id string) (*UserInfo, int) {
 	if exists {
 		return user, 0
 	} else {
-		return &UserInfo{}, 1
+		return &UserInfo{time.Now(), "invalid user", "chan", "invalid game", -1, -1}, 1
+	}
+}
+
+func (l *Logger) SetPerm(id string, lv int) {
+	if l.EntryExists(id) {
+		l.users[id].PermLevel = lv
+	}
+}
+
+func (l *Logger) SetPoints(id string, p int) {
+	if l.EntryExists(id) {
+		l.users[id].FancyPoints = p
 	}
 }
 
@@ -103,6 +127,8 @@ func (l *Logger) UpdateEntryMsg(id string, m *discordgo.MessageCreate) {
 func (l *Logger) UpdateEntryPresence(id string, p *discordgo.PresenceUpdate) {
 	if l.EntryExists(id) {
 		l.users[id].LastSeen = time.Now()
+		/// FIXME
+		//l.users[id].LastGame = p.Presence.Game.Name //causes crash
 	} else {
 		l.MakeUser(id)
 		l.UpdateEntryPresence(id, p)
