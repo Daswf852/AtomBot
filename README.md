@@ -7,9 +7,9 @@ AtomBot
 >>`go get github.com/bwmarrin/discordgo`  
   
 #### Usage  
-`go run AtomBot.go -t <bot token> -d <"database" file for 'seen'>`  
+`go run *.go -t <bot token> -c <configuration file>`  
   
 **or**  
   
-`go build AtomBot.go`  
-`./AtomBot -t xx -d yy`
+`go build *.go`  
+`./AtomBot -t xx -c yy`
