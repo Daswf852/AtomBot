@@ -27,6 +27,7 @@ type Command struct {
 	UsageMsg          string
 	IsDisplayedOnHelp bool
 	PermLevel         int
+	Category          string
 	Command           func(Arguments, *discordgo.Session, *discordgo.MessageCreate) string
 }
 type Arguments struct {
@@ -35,6 +36,7 @@ type Arguments struct {
 }
 type Parser struct {
 	commands     map[string]Command
+	categories   []string
 	prefix       string
 	unknownMsg   bool
 	logger       *Logger
@@ -43,7 +45,7 @@ type Parser struct {
 
 func MakeParser() Parser {
 	return Parser{
-		make(map[string]Command), "", true, nil, false}
+		make(map[string]Command), []string{}, "", false, nil, false}
 }
 
 func (p *Parser) LinkLogger(l *Logger) {
@@ -52,6 +54,9 @@ func (p *Parser) LinkLogger(l *Logger) {
 }
 
 func (p *Parser) SetPrefix(pr string) {
+	if pr != "" {
+		p.unknownMsg = true
+	}
 	p.prefix = pr
 
 }
@@ -63,10 +68,20 @@ func makeArguments(s string) Arguments {
 	return Arguments{parsed, len(parsed) - 1}
 }
 
+func (p *Parser) addCategory(c string) {
+	for _, v := range p.categories {
+		if v == c {
+			return
+		}
+	}
+	p.categories = append(p.categories, c)
+}
+
 func (p *Parser) Register(c *Command) {
 	if c != nil {
-		fmt.Println("Registered command: ", c.Name)
+		fmt.Println("Registered command ", c.Name, " With category ", c.Category)
 		p.commands[c.Name] = *c
+		p.addCategory(c.Category)
 	}
 }
 
@@ -96,7 +111,7 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 			return p.help("")
 		}
 	} else {
-		if p.unknownMsg && !(p.prefix == "") {
+		if p.unknownMsg && !(p.prefix == "") && valid {
 			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("current message: %s\nVariables: %v %v", m.Content, p.unknownMsg, valid))
 			return p.help("")
 		}
@@ -119,9 +134,14 @@ func (p *Parser) help(cmd string) string {
 			retStr = fmt.Sprintf("%sUsage: %s", retStr, foundCmd.UsageMsg)
 		}
 	} else {
-		retStr = fmt.Sprintf("%sCommand list:\n\t", retStr)
-		for _, v := range p.commands {
-			retStr = fmt.Sprintf("%s**%s** - %s\n\t", retStr, v.Name, v.HelpMsg)
+		retStr = fmt.Sprintf("%s**Categories:**\n\t", retStr)
+		for _, v := range p.categories {
+			retStr = fmt.Sprintf("%s**%s**\n\t", retStr, v)
+			for _, val := range p.commands {
+				if val.Category == v {
+					retStr = fmt.Sprintf("%s\t*%s* - `%s`\n\t", retStr, val.Name, val.HelpMsg)
+				}
+			}
 		}
 	}
 	return retStr

@@ -12,57 +12,69 @@ import (
 
 func registerCommands(p *Core.Parser) {
 	echoCmd := Core.Command{
-		"echo",
-		1,
-		"A command to *echo* what you say", "echo [message]",
-		true,
-		0,
-		echo}
+		Name:              "echo",
+		ArgumentCount:     1,
+		HelpMsg:           "A command to *echo* what you say",
+		UsageMsg:          "echo [message]",
+		IsDisplayedOnHelp: true,
+		PermLevel:         0,
+		Category:          "General",
+		Command:           echo}
 	p.Register(&echoCmd)
 
 	pingCmd := Core.Command{
 		"Ping!",
 		0,
-		"Ping the bot! Or maybe a website in future...", "Ping!",
+		"Ping the bot! Or maybe a website in future...",
+		"Ping!",
 		true,
 		0,
+		"General",
 		ping}
 	p.Register(&pingCmd)
 
 	succCmd := Core.Command{
 		"succ",
 		0,
-		"succ someone", "succ (opt.)[user mention]",
+		"succ someone",
+		"succ (opt.)[user mention]",
 		true,
 		0,
+		"Memes",
 		succ}
 	p.Register(&succCmd)
 
 	fuccCmd := Core.Command{
 		"fucc",
 		0,
-		"fucc someone", "fucc (opt.)[user mention]",
+		"fucc someone",
+		"fucc (opt.)[user mention]",
 		true,
 		0,
+		"Memes",
 		fucc}
 	p.Register(&fuccCmd)
 
 	whoamiCmd := Core.Command{
-		"whoami",
-		0,
-		"A command to get your user info", "whoami",
-		true,
-		0,
-		whoami}
+		Name:              "whoami",
+		ArgumentCount:     0,
+		HelpMsg:           "A command to get your user info",
+		UsageMsg:          "whoami",
+		IsDisplayedOnHelp: true,
+		PermLevel:         0,
+		Category:          "Information",
+		Command:           whoami}
 	p.Register(&whoamiCmd)
 
 	seenCmd := Core.Command{
-		"seen",
-		1,
-		"A command to see the last seen info of a user mentioned", "seen [user mention]",
-		true,
-		0,
-		seen}
+		Name:              "seen",
+		ArgumentCount:     1,
+		HelpMsg:           "A command to see the last seen info of a user mentioned",
+		UsageMsg:          "seen [user mention]",
+		IsDisplayedOnHelp: true,
+		PermLevel:         0,
+		Category:          "Information",
+		Command:           seen}
 	p.Register(&seenCmd)
 
 	shutdownCmd := Core.Command{
@@ -72,28 +84,42 @@ func registerCommands(p *Core.Parser) {
 		UsageMsg:          "shutdown",
 		IsDisplayedOnHelp: true,
 		PermLevel:         3,
+		Category:          "Administrative",
 		Command:           shutdown}
 	p.Register(&shutdownCmd)
 
 	setPointsCmd := Core.Command{
-		Name:              "setpts",
-		ArgumentCount:     0,
+		Name:              "setPoints",
+		ArgumentCount:     2,
 		HelpMsg:           "Sets a user's points",
-		UsageMsg:          "setpts <mention> <points>",
+		UsageMsg:          "setPoints <mention> <points>",
 		IsDisplayedOnHelp: true,
 		PermLevel:         3,
+		Category:          "Administrative",
 		Command:           setPoints}
 	p.Register(&setPointsCmd)
 
 	setPermCmd := Core.Command{
-		Name:              "setperm",
-		ArgumentCount:     0,
+		Name:              "setPerm",
+		ArgumentCount:     2,
 		HelpMsg:           "Sets a user's permission level",
-		UsageMsg:          "setperm <mention> <permlevel>",
+		UsageMsg:          "setPerm <mention> <permlevel>",
 		IsDisplayedOnHelp: true,
 		PermLevel:         3,
+		Category:          "Administrative",
 		Command:           setPerm}
 	p.Register(&setPermCmd)
+
+	setPrefixCmd := Core.Command{
+		Name:              "setPrefix",
+		ArgumentCount:     1,
+		HelpMsg:           "Set the bot's command prefix",
+		UsageMsg:          "setPrefix <prefix>",
+		IsDisplayedOnHelp: true,
+		PermLevel:         3,
+		Category:          "Administrative",
+		Command:           setprefix}
+	p.Register(&setPrefixCmd)
 }
 
 func echo(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
@@ -235,4 +261,9 @@ func setPoints(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCr
 		return "Invalid mention!"
 	}
 	return ""
+}
+
+func setprefix(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
+	Parser.SetPrefix(args.Args[1])
+	return "Done!"
 }
