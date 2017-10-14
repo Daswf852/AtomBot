@@ -73,6 +73,7 @@ func main() {
 }
 
 func onMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
+	//discordgo.Channel().GuildID
 	if m.Author.ID == s.State.User.ID {
 		Logger.UpdateEntryMsg(m.Author.ID, m)
 		return

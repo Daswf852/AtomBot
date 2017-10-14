@@ -28,6 +28,7 @@ type Command struct {
 	IsDisplayedOnHelp bool
 	PermLevel         int
 	Category          string
+	FancifyInput      bool
 	Command           func(Arguments, *discordgo.Session, *discordgo.MessageCreate) string
 }
 type Arguments struct {
@@ -95,6 +96,9 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 	user, _ := p.logger.GetInfo(m.Author.ID)
 
 	if valid && exists {
+		if function.FancifyInput {
+			arguments = makeArguments(FancifyText(m.Content, s, m))
+		}
 		if function.ArgumentCount <= arguments.Count {
 			if user.PermLevel >= function.PermLevel {
 				return function.Command(arguments, s, m)
@@ -112,7 +116,7 @@ func (p *Parser) Execute(s *discordgo.Session, m *discordgo.MessageCreate) strin
 		}
 	} else {
 		if p.unknownMsg && !(p.prefix == "") && valid {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("current message: %s\nVariables: %v %v", m.Content, p.unknownMsg, valid))
+			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("current message: %s\n", m.Content))
 			return p.help("")
 		}
 	}

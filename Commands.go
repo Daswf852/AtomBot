@@ -19,40 +19,44 @@ func registerCommands(p *Core.Parser) {
 		IsDisplayedOnHelp: true,
 		PermLevel:         0,
 		Category:          "General",
+		FancifyInput:      true,
 		Command:           echo}
 	p.Register(&echoCmd)
 
 	pingCmd := Core.Command{
-		"Ping!",
-		0,
-		"Ping the bot! Or maybe a website in future...",
-		"Ping!",
-		true,
-		0,
-		"General",
-		ping}
+		Name:              "Ping!",
+		ArgumentCount:     0,
+		HelpMsg:           "Ping the bot! Or maybe a website in future...",
+		UsageMsg:          "Ping!",
+		IsDisplayedOnHelp: true,
+		PermLevel:         0,
+		Category:          "General",
+		FancifyInput:      true,
+		Command:           ping}
 	p.Register(&pingCmd)
 
 	succCmd := Core.Command{
-		"succ",
-		0,
-		"succ someone",
-		"succ (opt.)[user mention]",
-		true,
-		0,
-		"Memes",
-		succ}
+		Name:              "succ",
+		ArgumentCount:     0,
+		HelpMsg:           "succ someone",
+		UsageMsg:          "succ (opt.)[user mention]",
+		IsDisplayedOnHelp: true,
+		PermLevel:         0,
+		Category:          "Memes",
+		FancifyInput:      true,
+		Command:           succ}
 	p.Register(&succCmd)
 
 	fuccCmd := Core.Command{
-		"fucc",
-		0,
-		"fucc someone",
-		"fucc (opt.)[user mention]",
-		true,
-		0,
-		"Memes",
-		fucc}
+		Name:              "fucc",
+		ArgumentCount:     0,
+		HelpMsg:           "fucc someone",
+		UsageMsg:          "fucc (opt.)[user mention]",
+		IsDisplayedOnHelp: true,
+		PermLevel:         0,
+		Category:          "Memes",
+		FancifyInput:      true,
+		Command:           fucc}
 	p.Register(&fuccCmd)
 
 	whoamiCmd := Core.Command{
@@ -63,17 +67,19 @@ func registerCommands(p *Core.Parser) {
 		IsDisplayedOnHelp: true,
 		PermLevel:         0,
 		Category:          "Information",
+		FancifyInput:      true,
 		Command:           whoami}
 	p.Register(&whoamiCmd)
 
 	seenCmd := Core.Command{
-		Name:              "seen",
+		Name:              "whois",
 		ArgumentCount:     1,
-		HelpMsg:           "A command to see the last seen info of a user mentioned",
-		UsageMsg:          "seen [user mention]",
+		HelpMsg:           "A command to see the info of a user mentioned",
+		UsageMsg:          "whois [user mention]",
 		IsDisplayedOnHelp: true,
 		PermLevel:         0,
 		Category:          "Information",
+		FancifyInput:      true,
 		Command:           seen}
 	p.Register(&seenCmd)
 
@@ -85,6 +91,7 @@ func registerCommands(p *Core.Parser) {
 		IsDisplayedOnHelp: true,
 		PermLevel:         3,
 		Category:          "Administrative",
+		FancifyInput:      true,
 		Command:           shutdown}
 	p.Register(&shutdownCmd)
 
@@ -96,6 +103,7 @@ func registerCommands(p *Core.Parser) {
 		IsDisplayedOnHelp: true,
 		PermLevel:         3,
 		Category:          "Administrative",
+		FancifyInput:      true,
 		Command:           setPoints}
 	p.Register(&setPointsCmd)
 
@@ -107,6 +115,7 @@ func registerCommands(p *Core.Parser) {
 		IsDisplayedOnHelp: true,
 		PermLevel:         3,
 		Category:          "Administrative",
+		FancifyInput:      true,
 		Command:           setPerm}
 	p.Register(&setPermCmd)
 
@@ -118,8 +127,21 @@ func registerCommands(p *Core.Parser) {
 		IsDisplayedOnHelp: true,
 		PermLevel:         3,
 		Category:          "Administrative",
+		FancifyInput:      true,
 		Command:           setprefix}
 	p.Register(&setPrefixCmd)
+
+	pointsCmd := Core.Command{
+		Name:              "points",
+		ArgumentCount:     3,
+		HelpMsg:           "Main points command",
+		UsageMsg:          "setPrefix <give/take/set/gift> <mention> <value>",
+		IsDisplayedOnHelp: true,
+		PermLevel:         0,
+		Category:          "Miscellaneous",
+		FancifyInput:      true,
+		Command:           points}
+	p.Register(&pointsCmd)
 }
 
 func echo(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
@@ -127,7 +149,6 @@ func echo(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate)
 	for i := 1; len(args.Args) > i; i++ {
 		retString = fmt.Sprintln(retString, args.Args[i])
 	}
-	fmt.Println(retString)
 	return retString
 }
 
@@ -136,7 +157,7 @@ func ping(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate)
 }
 
 func succ(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
-	s.ChannelMessageDelete(m.ChannelID, m.Message.ID)
+	//s.ChannelMessageDelete(m.ChannelID, m.Message.ID)
 	if args.Count >= 1 {
 		return fmt.Sprintf("***%s succs %s***", m.Author.Mention(), args.Args[1])
 	} else {
@@ -145,7 +166,7 @@ func succ(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate)
 }
 
 func fucc(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
-	s.ChannelMessageDelete(m.ChannelID, m.Message.ID)
+	//s.ChannelMessageDelete(m.ChannelID, m.Message.ID)
 	if args.Count >= 1 {
 		return fmt.Sprintf("***%s fuccs %s***", m.Author.Mention(), args.Args[1])
 	} else {
@@ -265,5 +286,54 @@ func setPoints(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCr
 
 func setprefix(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
 	Parser.SetPrefix(args.Args[1])
+	return "Done!"
+}
+
+func points(args Core.Arguments, s *discordgo.Session, m *discordgo.MessageCreate) string {
+	//give, take, set
+	val, err := strconv.Atoi(args.Args[3])
+	if err != nil {
+		return "3rd argument must be a number!"
+	}
+	if len(m.Mentions) > 0 {
+		if !Logger.EntryExists(m.Mentions[0].ID) {
+			return "The user mentioned isnt registered!"
+		}
+		usrT, _ := Logger.GetInfo(m.Mentions[0].ID) //target user
+		usrS, _ := Logger.GetInfo(m.Author.ID)      //source user
+		if args.Args[1] == "give" {
+			if usrS.PermLevel >= 3 {
+				if (usrT.FancyPoints + val) < 0 {
+					Logger.SetPoints(m.Mentions[0].ID, 0)
+				} else {
+					Logger.SetPoints(m.Mentions[0].ID, usrT.FancyPoints+val)
+				}
+			} else {
+				return "Insufficent permissions."
+			}
+		} else if args.Args[1] == "take" {
+			if usrS.PermLevel >= 3 {
+				if (usrT.FancyPoints - val) < 0 {
+					Logger.SetPoints(m.Mentions[0].ID, 0)
+				} else {
+					Logger.SetPoints(m.Mentions[0].ID, usrT.FancyPoints-val)
+				}
+			} else {
+				return "Insufficent permissions."
+			}
+		} else if args.Args[1] == "set" {
+			if usrS.PermLevel >= 3 {
+				Logger.SetPoints(m.Mentions[0].ID, val)
+			} else {
+				return "Insufficent permissions."
+			}
+		} else if args.Args[1] == "gift" {
+			return "Command not yet ready"
+		} else {
+			return "Wrong subcommand, it should be give/take/set/gift!"
+		}
+	} else {
+		return "Invalid mention!"
+	}
 	return "Done!"
 }
