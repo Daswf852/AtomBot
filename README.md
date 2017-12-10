@@ -1,5 +1,6 @@
 AtomBot
 =======
+WARNING: this bot is discontinued and my new --and tidy-- bot is coming soon
 ### A bot for Discord written with love in Go  
   
 #### Dependencies  
